@@ -98,6 +98,8 @@ class HypetNet(pl.LightningModule):
 
         preds = self.softmax((Q @ torch.transpose(V)) / np.sqrt(self.dim)) @ K
 
+        assert embeddings.shape == states.shape == preds.shape
+
         return embeddings, states, preds
 
 
