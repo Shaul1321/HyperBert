@@ -16,7 +16,7 @@ class MeanBlock(torch.nn.Module):
 
 class HypetNet(pl.LightningModule):
 
-    def __init__(self, embedder: embedder.Embedder, dim: int, dropout: float, effective_rank: int):
+    def __init__(self, embedder: embedder.Embedder, dim: int, dropout: float, effective_rank: int, dataset_param: dict):
         """
         :param embedder: the contextualized embedder to use (e.g. BERT)
         :param dim: the dimensionality of the embedding and model state vectors.
@@ -27,6 +27,7 @@ class HypetNet(pl.LightningModule):
         super().__init__()
         self.embedder = embedder
         self.dim = dim
+        self.dataset_param = dataset_param
         self.effective_rank = effective_rank
         self.mse = torch.nn.MSELoss()
         self.softmax = torch.nn.Softmax()
@@ -105,3 +106,27 @@ class HypetNet(pl.LightningModule):
         loss = self.mse(states, preds)
 
         return {"loss": loss}
+
+    def validation_step(self, batch, batch_nb):
+
+        embeddings, states, preds = self.forward(batch)
+        loss = self.mse(states, preds)
+
+        return {"val_loss": loss}
+
+   def validation_end(self, outputs):
+
+        avg_loss = torch.stack([x['val_loss'] for x in outputs]).mean()
+        return {'avg_val_loss': avg_loss}
+
+    @pl.data_loader
+    def train_dataloader(self):
+        return self.dataset_params["train"]
+
+    @pl.data_loader
+    def val_dataloader(self):
+        return self.dataset_params["dev"]
+
+    @pl.data_loader
+    def test_dataloader(self):
+        return self.dataset_params["test"]
