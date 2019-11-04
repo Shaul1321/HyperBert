@@ -95,6 +95,7 @@ class HypetNet(pl.LightningModule):
         Q,V,K = embeddings @ W_q, embeddings @ W_v, embeddings @ W_k
 
         # perform self attention
+
         preds = self.softmax((Q @ torch.transpose(V)) / np.sqrt(self.dim)) @ K
 
         return embeddings, states, preds
