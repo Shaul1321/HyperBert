@@ -83,8 +83,14 @@ class HypetNet(pl.LightningModule):
     def forward(self, batch: List[List[str]]):
 
         embeddings, states = self.embedder.get_states(batch)
+
+        assert embeddings.shape == states.shape
+
         concat = torch.cat((embeddings, states), dim = 1)
         W_q, W_v, W_k = self.generate_network(concat)
+
+        assert W_q.shape == W_v.shape == W_k.shape == self.dim**2
+
         Q,V,K = embeddings @ W_q, embeddings @ W_v, embeddings @ W_k
 
         # perform self attention
@@ -96,4 +102,6 @@ class HypetNet(pl.LightningModule):
     def training_step(self, batch, batch_nb):
 
         embeddings, states, preds = self.forward(batch)
+        loss = self.mse(states, preds)
 
+        return {"loss": loss}
