@@ -1,6 +1,5 @@
 import numpy as np
-from typing import List
-import Tuple
+from typing import List, Tuple
 import torch
 
 class Embedder(object):
@@ -30,7 +29,7 @@ class DummyEmbedder(object):
         batch_size = len(sentences)
         seq_len = len(sentences[0])
         dim = 768
-
+        
         embds, states = torch.rand(batch_size, seq_len, dim) - 0.5, torch.rand(batch_size, seq_len, dim) - 0.5
 
-        return (embds, dim)
+        return embds, states
